@@ -1,0 +1,47 @@
+captainVersion: 4
+services:
+    $$cap_appname:
+        image: docker.io/tombursch/kitchenowl-web@$$cap_front_version
+        environment:
+            BACK_URL: srv-captain--$$cap_appname-back:5000
+        depends_on:
+            - $$cap_appname-back
+        caproverExtra:
+            containerHttpPort: '80'
+    $$cap_appname-back:
+        image: docker.io/tombursch/kitchenowl@$$cap_back_version
+        restart: unless-stopped
+        environment:
+            JWT_SECRET_KEY: $$cap_jwt_secret_key
+        volumes:
+            - $$cap_appname-kitchenowl-data:/data
+        caproverExtra:
+            notExposeAsWebApp: 'true'
+caproverOneClickApp:
+    variables:
+        - id: $$cap_jwt_secret_key
+          label: JWT Secret Key
+          defaultValue: $$cap_gen_random_hex(64)
+          description: 'This key needs to be strong and at least 64 characters long. You can use "pwgen 64 -n 1" to generate one.'
+          validRegex: /.{64,}/
+        - id: $$cap_front_version
+          label: KitchenOwl Front-End Version
+          defaultValue: 'sha256:edcb9d526c76ef891d8ac157af3e4aca12fc750efc2c91767b2f393fc85d788d'
+          description: Check out their documentation for valid tags https://tombursch.github.io/kitchenowl/get-started/
+          validRegex: /^([^\s^\/])+$/
+        - id: $$cap_back_version
+          label: KitchenOwl Back-End Version
+          defaultValue: 'sha256:12429350125c4ca4403d59a061a88735ff457f1d39555e3b785870e62f7bf308'
+          description: Check out their documentation for valid tags https://tombursch.github.io/kitchenowl/get-started/
+          validRegex: /^([^\s^\/])+$/
+    instructions:
+        start: >-
+            KitchenOwl is a smart self-hosted grocery list and recipe manager. Easily add items to your shopping list before you go shopping.
+             You can also create recipes and get suggestions on what you want to cook. Track your expenses so you know how much you've spend.
+        end: >
+            KitchenOwl is deployed and available as $$cap_appname-front with a backend app called $$cap_appname-back .
+             IMPORTANT: It will take up to 2 minutes for KitchenOwl to be ready. Before that, you might see a 502 error page.
+    displayName: KitchenOwl
+    isOfficial: false
+    description: KitchenOwl is a smart self-hosted grocery list and recipe manager.
+    documentation: Taken from https://tombursch.github.io/kitchenowl/get-started/
